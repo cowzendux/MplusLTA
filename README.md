@@ -6,7 +6,7 @@ This program allows users to conduct a Latent Transition Analysis that they want
 This and other SPSS Python Extension functions can be found at http://www.stat-help.com/python.html
 
 ## Usage:
-**MplusLTA(inpfile, modellabel, runModel, viewOutput, suppressSPSS, nameList, profileList, groupList, starts, stiterations, optseed, svalues, estimator, useobservations, categorical, censored, count, nominal, idvariable, modelDatasetName, meanDatasetName, datasetLabels, savedata, saveCprob, processors, waittime)
+**MplusLTA(inpfile, modellabel, runModel, viewOutput, suppressSPSS, nameList, profileList, groupList, starts, stiterations, optseed, svalues, estimator, useobservations, categorical, censored, count, nominal, idvariable, modelDatasetName, meanDatasetName, datasetLabels, savedata, saveCprob, processors, waittime)**
 * "inpfile" is a string identifying the directory and filename of Mplus input file to be created by the program. This filename must end with .inp . The data file will automatically be saved to the same directory. This argument is required.
 * "modellabel" is a string that indicates what label should be added to the output at the top of your model. If this is not specified, the label defaults to "MplusLTA"
 * "runModel" is a boolean argument indicating whether or not you want the program to actually run the program it creates based on the model you define. You may choose to not run the model when you want to use the program to load an existing output file into SPSS. However, when doing this, you should first load the corresponding data set so that the function can determine the appropriate translation between the Mplus variable names and SPSS variable names. By default, the model is run.
@@ -47,7 +47,7 @@ stiterations = 20,
 modelDatasetName = "Personality",  
 savedata = "D:/Personality/Mplus/model.txt",  
 saveCprob = True,  
-waittime = 20)  
+waittime = 20)**  
 * This program would conduct a transition analysis for the Big 5 personality scales across two timepoints.
 * Five variables are being examined at each time point.
 * The profile analysis at time 1 will create 3 groups, while the profile analysis at time 2 will create 2 groups.
@@ -56,7 +56,7 @@ waittime = 20)
 * The full data set including the assigned profile as well as the probabilities associated with each profile would be saved to the file "D:/Personality/Mplus/model.txt".
 
 ## Example 2 - Running a specific random seed: 
-MplusLTA(inpfile = "D:/Personality/Mplus/model.inp,  
+**MplusLTA(inpfile = "D:/Personality/Mplus/model.inp,  
 modellabel = "3-group LPA",  
 nameList = ["Time1",  "Time2"],  
 profileList = [ ["OpennessT1", "ConcientiousnessT1", "ExtraversionT1", "AgreeablenessT1", "NeuroticismT1"],  
@@ -67,7 +67,7 @@ svalues = [ [3, 1, 2], [1, 2] ],
 modelDatasetName = "Personality",  
 savedata = "D:/Personality/Mplus/model.txt",  
 saveCprob = True,  
-waittime = 20)  
+waittime = 20)**  
 * This program would conduct a transition analysis for the Big 5 personality scales across two timepoints.
 * Five variables are being examined at each time point.
 * The profile analysis at time 1 will create 3 groups, while the profile analysis at time 2 will create 2 groups.
