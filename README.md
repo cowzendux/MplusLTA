@@ -40,7 +40,7 @@ This and other SPSS Python Extension functions can be found at http://www.stat-h
 modellabel = "3-group LPA",  
 nameList = ["Time1",  "Time2"],  
 profileList = [ ["OpennessT1", "ConcientiousnessT1", "ExtraversionT1", "AgreeablenessT1", "NeuroticismT1"],  
-["OpennessT2", "ConcientiousnessT2", "ExtraversionT2", "AgreeablenessT2", "NeuroticismT2"] ],  
+$~~~~$["OpennessT2", "ConcientiousnessT2", "ExtraversionT2", "AgreeablenessT2", "NeuroticismT2"] ],  
 groups = [3, 2],  
 starts = 500,  
 stiterations = 20,  
