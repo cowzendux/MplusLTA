@@ -185,7 +185,7 @@ associated with each profile would be saved to the file
 "D:/Personality/Mplus/model.txt".
 
 set printback = off.
-begin program python.
+begin program python3.
 import spss, spssaux, os, sys, time, re, tempfile, SpssClient
 from subprocess import Popen, PIPE
 
@@ -197,7 +197,7 @@ def _titleToPane():
     filename = tempfile.mktemp() + ".txt"
     for index in range(outputItemList.Size()):
         outputItem = outputItemList.GetItemAt(index)
-        if outputItem.GetDescription() == u"Page Title":
+        if outputItem.GetDescription() == "Page Title":
             outputItem.ExportToDocument(filename, textFormat)
             with open(filename) as f:
                 outputItem.SetDescription(f.read().rstrip())
@@ -216,18 +216,18 @@ def titleToPane(spv=None):
         if spv and outputDoc:
             outputDoc.SaveAs(spv)
     except:
-        print "Error filling TITLE in Output Viewer [%s]" % sys.exc_info()[1]
+        print("Error filling TITLE in Output Viewer [{}]".format(sys.exc_info()[1]))
     finally:
         SpssClient.StopClient()
 
 def MplusSplit(splitstring, linelength):
     returnstring = ""
     curline = splitstring
-    while (len(curline) > linelength):
+    while len(curline) > linelength:
         splitloc = linelength
-        while (curline[splitloc] == " " or curline[splitloc-1] == " "):
-            splitloc = splitloc -1
-        returnstring = returnstring + curline[:splitloc] + "\n"
+        while curline[splitloc] == " " or curline[splitloc - 1] == " ":
+            splitloc -= 1
+        returnstring += curline[:splitloc] + "\n"
         curline = curline[splitloc:]
     returnstring += curline
     return returnstring
@@ -237,9 +237,9 @@ def SPSSspaceSplit(splitstring, linelength):
     returnstring = "'"
     curline = ""
     for word in stringwords:
-        if (len(word) > linelength):
+        if len(word) > linelength:
             break
-        if (len(word) + len(curline) < linelength - 1):
+        if len(word) + len(curline) < linelength - 1:
             curline += word + " "
         else:
             returnstring += curline + "' +\n'"
@@ -249,183 +249,184 @@ def SPSSspaceSplit(splitstring, linelength):
 
 def numericMissing(definition):
     for varnum in range(spss.GetVariableCount()):
-        if (spss.GetVariableType(varnum) == 0):
-      # for numeric variables
+        if spss.GetVariableType(varnum) == 0:
+            # for numeric variables
             submitstring = """
-missing values %s (%s).""" %(spss.GetVariableName(varnum), definition)
+missing values %s (%s).""" % (spss.GetVariableName(varnum), definition)
             spss.Submit(submitstring)
 
 def exportMplus(filepath):
-######
-# Get list of current variables in SPSS data set
-######
- SPSSvarlist = []
- for varnum in range(spss.GetVariableCount()):
-  SPSSvarlist.append(spss.GetVariableName(varnum))
+    ######
+    # Get list of current variables in SPSS data set
+    ######
+    SPSSvarlist = []
+    for varnum in range(spss.GetVariableCount()):
+        SPSSvarlist.append(spss.GetVariableName(varnum))
 
-##########
-# Replace non-alphanumeric characters with _ in the variable names
-##########
- nonalphanumeric = [".", "@", "#", "$"]
-	for t in range(spss.GetVariableCount()):
-		oldname = spss.GetVariableName(t)
-		newname = ""
-		for i in range(len(oldname)):
-			if(oldname[i] in nonalphanumeric):
-				newname = newname +"_"
-			else:
-				newname = newname+oldname[i]
-		newname = newname.lstrip("_")
-		for i in range(t):
-			compname = spss.GetVariableName(i)
-			if (newname.lower() == compname.lower()):
-				newname = "var" + "%05d" %(t+1)
-		if (oldname != newname):
-			submitstring = "rename variables (%s = %s)." %(oldname, newname)
-			spss.Submit(submitstring)
-#########
-# Rename variables with names > 8 characters
-#########
- for t in range(spss.GetVariableCount()):
-		if (len(spss.GetVariableName(t)) > 8):
-			name = spss.GetVariableName(t)[0:8]
-			for i in range(spss.GetVariableCount()):
-				compname = spss.GetVariableName(i)
-				if (name.lower() == compname.lower()):
-					name = "var" + "%05d" %(t+1)
-			submitstring = "rename variables (%s = %s)." %(spss.GetVariableName(t), name)
-			spss.Submit(submitstring)
+    ##########
+    # Replace non-alphanumeric characters with _ in the variable names
+    ##########
+    nonalphanumeric = [".", "@", "#", "$"]
+    for t in range(spss.GetVariableCount()):
+        oldname = spss.GetVariableName(t)
+        newname = ""
+        for i in range(len(oldname)):
+            if oldname[i] in nonalphanumeric:
+                newname = newname + "_"
+            else:
+                newname = newname + oldname[i]
+        newname = newname.lstrip("_")
+        for i in range(t):
+            compname = spss.GetVariableName(i)
+            if newname.lower() == compname.lower():
+                newname = "var" + "%05d" % (t + 1)
+        if oldname != newname:
+            submitstring = "rename variables (%s = %s)." % (oldname, newname)
+            spss.Submit(submitstring)
 
-# Obtain lists of variables in the dataset
-	varlist = []
-	numericlist = []
-	stringlist = []
-	for t in range(spss.GetVariableCount()):
-		varlist.append(spss.GetVariableName(t))
-		if (spss.GetVariableType(t) == 0):
-			numericlist.append(spss.GetVariableName(t))
-		else:
-			stringlist.append(spss.GetVariableName(t))
+    #########
+    # Rename variables with names > 8 characters
+    #########
+    for t in range(spss.GetVariableCount()):
+        if len(spss.GetVariableName(t)) > 8:
+            name = spss.GetVariableName(t)[0:8]
+            for i in range(spss.GetVariableCount()):
+                compname = spss.GetVariableName(i)
+                if name.lower() == compname.lower():
+                    name = "var" + "%05d" % (t + 1)
+            submitstring = "rename variables (%s = %s)." % (spss.GetVariableName(t), name)
+            spss.Submit(submitstring)
 
-###########
-# Automatically recode string variables into numeric variables
-###########
-# First renaming string variables so the new numeric vars can take the 
-# original variable names
-	submitstring = "rename variables"
-	for var in stringlist:
-		submitstring = submitstring + "\n " + var + "=" + var + "_str"
-	submitstring = submitstring + "."
-	spss.Submit(submitstring)
+    # Obtain lists of variables in the dataset
+    varlist = []
+    numericlist = []
+    stringlist = []
+    for t in range(spss.GetVariableCount()):
+        varlist.append(spss.GetVariableName(t))
+        if spss.GetVariableType(t) == 0:
+            numericlist.append(spss.GetVariableName(t))
+        else:
+            stringlist.append(spss.GetVariableName(t))
 
-# Recoding variables
- if (len(stringlist) > 0):
- 	submitstring = "AUTORECODE VARIABLES="
-	 for var in stringlist:
-		 submitstring = submitstring + "\n " + var + "_str"
- 	submitstring = submitstring + "\n /into"
-	 for var in stringlist:
-		 submitstring = submitstring + "\n " + var
- 	submitstring = submitstring + """
-   /BLANK=MISSING
-   /PRINT."""
-	 spss.Submit(submitstring)
-	
-# Dropping string variables
-	submitstring = "delete variables"
-	for var in stringlist:
-		submitstring = submitstring + "\n " + var + "_str"
-	submitstring = submitstring + "."
-	spss.Submit(submitstring)
+    ###########
+    # Automatically recode string variables into numeric variables
+    ###########
+    # First renaming string variables so the new numeric vars can take the 
+    # original variable names
+    submitstring = "rename variables"
+    for var in stringlist:
+        submitstring = submitstring + "\n " + var + "=" + var + "_str"
+    submitstring = submitstring + "."
+    spss.Submit(submitstring)
 
-# Set all missing values to be -999
-	submitstring = "RECODE "
-	for var in varlist:
-		submitstring = submitstring + " " + var + "\n"
-	submitstring = submitstring + """ (MISSING=-999).
-EXECUTE."""
-	spss.Submit(submitstring)
+    # Recoding variables
+    if len(stringlist) > 0:
+        submitstring = "AUTORECODE VARIABLES="
+        for var in stringlist:
+            submitstring = submitstring + "\n " + var + "_str"
+        submitstring = submitstring + "\n /into"
+        for var in stringlist:
+            submitstring = submitstring + "\n " + var
+        submitstring = submitstring + """
+        /BLANK=MISSING
+        /PRINT."""
+        spss.Submit(submitstring)
 
- numericMissing("-999")
+    # Dropping string variables
+    submitstring = "delete variables"
+    for var in stringlist:
+        submitstring = submitstring + "\n " + var + "_str"
+    submitstring = submitstring + "."
+    spss.Submit(submitstring)
 
-########
-# Convert date and time variables to numeric
-########
-# SPSS actually stores dates as the number of seconds that have elapsed since October 14, 1582.
-# This syntax takes variables with a date type and puts them in their natural numeric form
+    # Set all missing values to be -999
+    submitstring = "RECODE "
+    for var in varlist:
+        submitstring = submitstring + " " + var + "\n"
+    submitstring = submitstring + """ (MISSING=-999).
+    EXECUTE."""
+    spss.Submit(submitstring)
 
- submitstring = """numeric ddate7663804 (f11.0).
-alter type ddate7663804 (date11).
-ALTER TYPE ALL (DATE = F11.0).
-alter type ddate7663804 (adate11).
-ALTER TYPE ALL (ADATE = F11.0).
-alter type ddate7663804 (sdate11).
-ALTER TYPE ALL (SDATE = F11.0).
-alter type ddate7663804 (edate11).
-ALTER TYPE ALL (EDATE = F11.0).
-alter type ddate7663804 (jdate11).
-ALTER TYPE ALL (JDATE = F11.0).
-alter type ddate7663804 (datetime17).
-ALTER TYPE ALL (DATETIME = F11.0).
-alter type ddate7663804 (time11).
-ALTER TYPE ALL (TIME = F11.0).
-alter type ddate7663804 (qyr6).
-ALTER TYPE ALL (QYR = F11.0).
-alter type ddate7663804 (moyr6).
-ALTER TYPE ALL (MOYR = F11.0).
-alter type ddate7663804 (ymdhms16).
-ALTER TYPE ALL (YMDHMS = F11.0).
-alter type ddate7663804 (wkday3).
-ALTER TYPE ALL (WKDAY = F11.0).
-alter type ddate7663804 (month3).
-ALTER TYPE ALL (MONTH = F11.0).
+    numericMissing("-999")
 
-delete variables ddate7663804."""
- spss.Submit(submitstring)
+    ########
+    # Convert date and time variables to numeric
+    ########
+    # SPSS actually stores dates as the number of seconds that have elapsed since October 14, 1582.
+    # This syntax takes variables with a date type and puts them in their natural numeric form
 
-######
-# Obtain list of transformed variables
-######
- submitstring = """MATCH FILES /FILE=*
-  /keep="""
- for var in varlist:
-		submitstring = submitstring + "\n " + var
- submitstring = submitstring + """.
-EXECUTE."""
- spss.Submit(submitstring)
- MplusVarlist = []
- for varnum in range(spss.GetVariableCount()):
-  MplusVarlist.append(spss.GetVariableName(varnum))
+    submitstring = """numeric ddate7663804 (f11.0).
+    alter type ddate7663804 (date11).
+    ALTER TYPE ALL (DATE = F11.0).
+    alter type ddate7663804 (adate11).
+    ALTER TYPE ALL (ADATE = F11.0).
+    alter type ddate7663804 (sdate11).
+    ALTER TYPE ALL (SDATE = F11.0).
+    alter type ddate7663804 (edate11).
+    ALTER TYPE ALL (EDATE = F11.0).
+    alter type ddate7663804 (jdate11).
+    ALTER TYPE ALL (JDATE = F11.0).
+    alter type ddate7663804 (datetime17).
+    ALTER TYPE ALL (DATETIME = F11.0).
+    alter type ddate7663804 (time11).
+    ALTER TYPE ALL (TIME = F11.0).
+    alter type ddate7663804 (qyr6).
+    ALTER TYPE ALL (QYR = F11.0).
+    alter type ddate7663804 (moyr6).
+    ALTER TYPE ALL (MOYR = F11.0).
+    alter type ddate7663804 (ymdhms16).
+    ALTER TYPE ALL (YMDHMS = F11.0).
+    alter type ddate7663804 (wkday3).
+    ALTER TYPE ALL (WKDAY = F11.0).
+    alter type ddate7663804 (month3).
+    ALTER TYPE ALL (MONTH = F11.0).
 
-############
-# Create data file
-############
-# Break filename over multiple lines
- splitfilepath = SPSSspaceSplit(filepath, 60)
+    delete variables ddate7663804."""
+    spss.Submit(submitstring)
 
-# Save data as a tab-delimited text file
-	submitstring = """SAVE TRANSLATE OUTFILE=
-	%s
-  /TYPE=TAB
-  /MAP
-  /REPLACE
-  /CELLS=VALUES
-	/keep""" %(splitfilepath)
-	for var in varlist:
-		submitstring = submitstring + "\n " + var
-	submitstring = submitstring + "."
-	spss.Submit(submitstring)
+    ######
+    # Obtain list of transformed variables
+    ######
+    submitstring = """MATCH FILES /FILE=*
+    /keep="""
+    for var in varlist:
+        submitstring = submitstring + "\n " + var
+    submitstring = submitstring + """.
+    EXECUTE."""
+    spss.Submit(submitstring)
+    MplusVarlist = []
+    for varnum in range(spss.GetVariableCount()):
+        MplusVarlist.append(spss.GetVariableName(varnum))
 
-##############
-# Rename variables back to original values
-##############
- submitstring = "rename variables"
- for s, m in zip(SPSSvarlist, MplusVarlist):
-  submitstring += "\n(" + m + "=" + s + ")"
- submitstring += "."
- spss.Submit(submitstring)
+    ############
+    # Create data file
+    ############
+    # Break filename over multiple lines
+    splitfilepath = SPSSspaceSplit(filepath, 60)
 
- return MplusVarlist
+    # Save data as a tab-delimited text file
+    submitstring = """SAVE TRANSLATE OUTFILE=
+    %s
+    /TYPE=TAB
+    /MAP
+    /REPLACE
+    /CELLS=VALUES
+    /keep""" % (splitfilepath)
+    for var in varlist:
+        submitstring = submitstring + "\n " + var
+    submitstring = submitstring + "."
+    spss.Submit(submitstring)
+
+    ##############
+    # Rename variables back to original values
+    ##############
+    submitstring = "rename variables"
+    for s, m in zip(SPSSvarlist, MplusVarlist):
+        submitstring += "\n(" + m + "=" + s + ")"
+    submitstring += "."
+    spss.Submit(submitstring)
+
+    return MplusVarlist
 
 class MplusLTAprogram:
     def __init__(self):
@@ -450,53 +451,53 @@ class MplusLTAprogram:
         self.data += "'" + splitName + "';"
 
     def setVariable(self, fullList, nameList, profileList, groupList, useobservations, 
-categorical, censored, count, nominal, idvariable, auxiliary):
+                    categorical, censored, count, nominal, idvariable, auxiliary):
         self.variable += "Names are\n"
         for var in fullList:
             self.variable += var + "\n"
         self.variable += ";\n\n"
 
-# Determine usevariables
+        # Determine usevariables
         useList = profileList[:]
         self.variable += "Usevariables are\n"
         for p in useList:
             for var in p:
                 self.variable += var + "\n"
 
-# Other variable additions
-        if (useobservations != None):
+        # Other variable additions
+        if useobservations is not None:
             self.variable += ";\n\nuseobservations are " + useobservations
-        if (idvariable != None):
+        if idvariable is not None:
             self.variable += ";\n\nidvariable is " + idvariable
-        if (auxiliary != []):
-            self.variable += ";\n\nauxiliary = (m) " 
+        if auxiliary:
+            self.variable += ";\n\nauxiliary = (m) "
             for var in auxiliary:
                 self.variable += var + "\n"
 
         vartypeList = [categorical, censored, count, nominal]
         varnameList = ["categorical", "censored", "count", "nominal"]
         for t in range(len(vartypeList)):
-            if (vartypeList[t] != []):
+            if vartypeList[t]:
                 self.variable += ";\n\n{0} = ".format(varnameList[t])
                 for var in vartypeList[t]:
                     self.variable += var + "\n"
         self.variable += ";\n\nMISSING ARE ALL (-999);"
         self.variable += "\n\nclasses = "
         for name, groups in zip(nameList, groupList):
-            self.variable += name + "("+ str(groups) + ") "
+            self.variable += name + "(" + str(groups) + ") "
         self.variable += ";"
         
     def setAnalysis(self, estimator, starts, stiterations, optseed, processors):
         self.analysis += "type = mixture;"
-        if (estimator != None):
+        if estimator is not None:
             self.analysis += "\nestimator = {0};".format(estimator)
-        if (starts != None):
-            self.analysis += "\nstarts = {0} {1};".format(str(starts), str(int(starts/5)))
-        if (stiterations != None):
+        if starts is not None:
+            self.analysis += "\nstarts = {0} {1};".format(str(starts), str(int(starts / 5)))
+        if stiterations is not None:
             self.analysis += "\nstiterations = {0};".format(str(stiterations))
-        if (optseed != None):
+        if optseed is not None:
             self.analysis += "\noptseed = {0};".format(str(optseed))
-        if (processors != None):
+        if processors is not None:
             self.analysis += "\nprocessors = {0};".format(str(processors))
 
     def setModel(self, nameList, profileList, groupList):
@@ -504,59 +505,58 @@ categorical, censored, count, nominal, idvariable, auxiliary):
         for name, groups, varList in zip(nameList, groupList, profileList):
             self.model += "\n\nModel {0}:".format(name)
             for g in range(groups):
-                self.model += "\n\n%{0}#{1}%".format(name, str(g+1))
+                self.model += "\n\n%{0}#{1}%".format(name, str(g + 1))
                 for var in varList:
                     self.model += "\n[{0}];".format(var)
         
     def setOutput(self, svalues):
-        if (svalues != None):
+        if svalues is not None:
             self.output += "\nsvalues ("
             count = 0
             for p in svalues:
                 count += 1
                 for o in p:
                     self.output += str(o) + " "
-                if (count == len(svalues)):
+                if count == len(svalues):
                     self.output += ");"
                 else:
                     self.output += "|"
 
     def setSavedata(self, savedata, saveCprob):
-        if (savedata != None):
+        if savedata is not None:
             splitName = MplusSplit(savedata, 75)
             self.savedata += "\nfile = \n'{0}';".format(splitName)
-            if (saveCprob == True):
+            if saveCprob:
                 self.savedata += "\nsave = cprob;"
 
     def write(self, filename):
-# Write input file
+        # Write input file
         sectionList = [self.title, self.data, self.variable, self.define,
-self.analysis, self.model, self.constraint, self.output, self.savedata, 
-self.plot, self.montecarlo]
-        outfile = open(filename, "w")
-        for sec in sectionList:
-            if (sec[-2:] != ":\n"):
-                outfile.write(sec)
-                outfile.write("\n\n")
-        outfile.close()
+                       self.analysis, self.model, self.constraint, self.output, self.savedata, 
+                       self.plot, self.montecarlo]
+        with open(filename, "w") as outfile:
+            for sec in sectionList:
+                if sec[-2:] != ":\n":
+                    outfile.write(sec)
+                    outfile.write("\n\n")
 
 def batchfile(directory, filestem):
-# Write batch file
-    batchFile = open(directory + "/" + filestem + ".bat", "w")
+    # Write batch file
+    batchFile = open(os.path.join(directory, filestem + ".bat"), "w")
     batchFile.write("cd " + directory + "\n")
-    batchFile.write("call mplus \"" + filestem + ".inp" + "\"\n")
+    batchFile.write('call mplus "' + filestem + '.inp' + '"\n')
     batchFile.close()
 
-# Run batch file
-    p = Popen(directory + "/" + filestem + ".bat", cwd=directory)
+    # Run batch file
+    p = Popen(os.path.join(directory, filestem + ".bat"), cwd=directory)
 
 def removeBlanks(processString):
-    if (processString == None):
-        return (None)
+    if processString is None:
+        return None
     else:
         for t in range(len(processString), 0, -1):
-                if (processString[t-1] != "\n"):
-                    return (processString[0:t])
+            if processString[t-1] != "\n":
+                return processString[0:t]
 
 class MplusLTAoutput:
     def __init__(self, modellabel, filename, Mplus, SPSS, nameList, groupList, estimator):
@@ -960,88 +960,70 @@ words[0], float(words[1]), float(words[2])])
         spss.SetActive(datasetObj)
         spss.EndDataStep()
 
-def MplusLTA(inpfile, modellabel = "MplusLTA",
-runModel = True, viewOutput = True, suppressSPSS = False, 
-nameList = None, profileList = None, groupList = None, 
-starts = None, stiterations = None, optseed = None, svalues = None,
-estimator = None,
-useobservations = None, 
-categorical = None, censored = None, count = None, nominal = None,
-idvariable = None, auxiliary = None, 
-modelDatasetName = None, 
-meanDatasetName = None,
-datasetLabels = [], 
-savedata = None, saveCprob = False, 
-processors = None, waittime = 5):
+def MplusLTA(inpfile, modellabel="MplusLTA", runModel=True, viewOutput=True, suppressSPSS=False, 
+             nameList=None, profileList=None, groupList=None, starts=None, stiterations=None, 
+             optseed=None, svalues=None, estimator=None, useobservations=None, categorical=None, 
+             censored=None, count=None, nominal=None, idvariable=None, auxiliary=None, 
+             modelDatasetName=None, meanDatasetName=None, datasetLabels=[], savedata=None, 
+             saveCprob=False, processors=None, waittime=5):
 
     spss.Submit("display scratch.")
 
-# Redirect output
-    if (suppressSPSS == True):
+    # Redirect output
+    if suppressSPSS:
         submitstring = """OMS /SELECT ALL EXCEPT = [WARNINGS] 
     /DESTINATION VIEWER = NO 
     /TAG = 'NoJunk'."""
         spss.Submit(submitstring)
 
-# Find directory and filename
+    # Find directory and filename
     for t in range(len(inpfile)):
-        if (inpfile[-t] == "/"):
+        if inpfile[-t] == "/":
             break
     outdir = inpfile[:-t+1]
     fname, fext = os.path.splitext(inpfile[-(t-1):])
 
-# Obtain list of variables in data set
+    # Obtain list of variables in data set
     SPSSvariables = []
     SPSSvariablesCaps = []
     for varnum in range(spss.GetVariableCount()):
         SPSSvariables.append(spss.GetVariableName(varnum))
         SPSSvariablesCaps.append(spss.GetVariableName(varnum).upper())
 
-# Restore output
-    if (suppressSPSS == True):
+    # Restore output
+    if suppressSPSS:
         submitstring = """OMSEND TAG = 'NoJunk'."""
         spss.Submit(submitstring)
 
-# Check for errors
+    # Check for errors
     error = 0
-    if (fext.upper() != ".INP"):
-        print ("Error: Input file specification does not end with .inp")
+    if fext.upper() != ".INP":
+        print("Error: Input file specification does not end with .inp")
         error = 1
-    if (not os.path.exists(outdir)):
+    if not os.path.exists(outdir):
         print("Error: Output directory does not exist")
         error = 1
-    if (estimator != None):
+    if estimator is not None:
         estimator = estimator.upper()
-        if (estimator not in ["ML",
-"MLM",
-"MLMV",
-"MLR",
-"MLF",
-"MUML",
-"WLS",
-"WLSM",
-"WLSMV",
-"ULS",
-"ULSMV",
-"GLS",
-"BAYES"]):
+        if estimator not in ["ML", "MLM", "MLMV", "MLR", "MLF", "MUML", "WLS", "WLSM", "WLSMV",
+                             "ULS", "ULSMV", "GLS", "BAYES"]:
             print("Error: Estimator not valid")
             error = 1
-                    
-    if (error == 0):
-# Redirect output
-        if (suppressSPSS == True):
+
+    if error == 0:
+        # Redirect output
+        if suppressSPSS:
             submitstring = """OMS /SELECT ALL EXCEPT = [WARNINGS] 
     /DESTINATION VIEWER = NO 
     /TAG = 'NoJunk'."""
             spss.Submit(submitstring)
 
-# Export data
+        # Export data
         dataname = outdir + fname + ".dat"
         MplusVariables = exportMplus(dataname)
 
-# Convert useobservations to Mplus
-        if (useobservations == None):
+        # Convert useobservations to Mplus
+        if useobservations is None:
             MplusUseobservations = None
         else:
             MplusUseobservations = useobservations
@@ -1049,15 +1031,15 @@ processors = None, waittime = 5):
                 z = re.compile(s, re.IGNORECASE)
                 MplusUseobservations = z.sub(m, MplusUseobservations)
                 
-# Convert idvariable to Mplus
-        if (idvariable == None):
+        # Convert idvariable to Mplus
+        if idvariable is None:
             MplusIdvariable = None
         else:
             for s, m in zip(SPSSvariablesCaps, MplusVariables):
-                if (idvariable.upper() == s):
+                if idvariable.upper() == s:
                     MplusIdvariable = m
 
-# Convert variable list arguments to Mplus
+        # Convert variable list arguments to Mplus
         lvarList = [auxiliary, categorical, censored, count, nominal]
         MplusMeans = []
         MplusAuxiliary = []
@@ -1065,79 +1047,77 @@ processors = None, waittime = 5):
         MplusCensored = []
         MplusCount = []
         MplusNominal = []
-        lvarMplusList = [MplusAuxiliary, MplusCategorical, 
-MplusCensored, MplusCount, MplusNominal]
+        lvarMplusList = [MplusAuxiliary, MplusCategorical, MplusCensored, MplusCount, MplusNominal]
         for t in range(len(lvarList)):
-            if (lvarList[t] == None):
+            if lvarList[t] is None:
                 lvarMplusList[t] = None
             else:
                 for i in lvarList[t]:
                     lvarMplusList[t].append(i.upper())
                 for i in range(len(lvarMplusList[t])):
                     for s, m in zip(SPSSvariablesCaps, MplusVariables):
-                        if (lvarMplusList[t][i] == s):
+                        if lvarMplusList[t][i] == s:
                             lvarMplusList[t][i] = m
 
-# Convert profileList to Mplus
+        # Convert profileList to Mplus
         MplusProfileList = []
         for p in profileList:
             mplusP = []
             for var in p:
                 for s, m in zip(SPSSvariablesCaps, MplusVariables):
-                    if (var.upper() == s):
+                    if var.upper() == s:
                         mplusP.append(m)
             MplusProfileList.append(mplusP)
 
-# Create input program
+        # Create input program
         pathProgram = MplusLTAprogram()
         pathProgram.setTitle("Created by MplusLTA")
         pathProgram.setData(dataname)
         pathProgram.setVariable(MplusVariables, nameList, MplusProfileList, groupList, 
-MplusUseobservations, 
-MplusCategorical, MplusCensored, MplusCount, MplusNominal, 
-MplusIdvariable, MplusAuxiliary)
+                                MplusUseobservations, MplusCategorical, MplusCensored, MplusCount, 
+                                MplusNominal, MplusIdvariable, MplusAuxiliary)
         pathProgram.setModel(nameList, MplusProfileList, groupList)
         pathProgram.setAnalysis(estimator, starts, stiterations, optseed, processors)
         pathProgram.setOutput(svalues)
         pathProgram.setSavedata(savedata, saveCprob)
         pathProgram.write(outdir + fname + ".inp")
 
-# Run input program
-        if (runModel == True):
+        # Run input program
+        if runModel:
             batchfile(outdir, fname)
             time.sleep(waittime)
 
-# Restore output
-        if (suppressSPSS == True):
+        # Restore output
+        if suppressSPSS:
             submitstring = """OMSEND TAG = 'NoJunk'."""
             spss.Submit(submitstring)
 
-        if (viewOutput == True):
-            pathOutput = MplusLTAoutput(modellabel, outdir + fname + ".out", 
-    MplusVariables, SPSSvariables, nameList, groupList, estimator)
+        if viewOutput:
+            pathOutput = MplusLTAoutput(modellabel, outdir + fname + ".out", MplusVariables, 
+                                        SPSSvariables, nameList, groupList, estimator)
             pathOutput.toSPSSoutput()
 
-# Redirect output
-            if (suppressSPSS == True):
+            # Redirect output
+            if suppressSPSS:
                 submitstring = """OMS /SELECT ALL EXCEPT = [WARNINGS] 
     /DESTINATION VIEWER = NO 
     /TAG = 'NoJunk'."""
                 spss.Submit(submitstring)
 
-    # Create dataset
-            if (modelDatasetName != None):
+            # Create dataset
+            if modelDatasetName is not None:
                 pathOutput.modelToSPSSdata(modelDatasetName, nameList, groupList, datasetLabels)
-            if (meanDatasetName != None):
-                pathOutput.meansToSPSSdata(meanDatasetName, nameList, groupList, datasetLabels)                
+            if meanDatasetName is not None:
+                pathOutput.meansToSPSSdata(meanDatasetName, nameList, groupList, datasetLabels)
 
-# Restore output
-            if (suppressSPSS == True):
+            # Restore output
+            if suppressSPSS:
                 submitstring = """OMSEND TAG = 'NoJunk'."""
                 spss.Submit(submitstring)
 
-# Replace titles
+    # Replace titles
     titleToPane()
-end program python.
+end program python3.
 set printback = on.
 
 ************
@@ -1150,6 +1130,7 @@ set printback = on.
 * 2022-03-29 Added optseed and svalues arguments
 * 2022-07-19 Extracted minimum n for timepoints separately
 *    Used round() instead of int() when calculating minimum N
+* 2024-05-30 Converted to Python 3
 COMMENT BOOKMARK;LINE_NUM=714;ID=2.
 COMMENT BOOKMARK;LINE_NUM=761;ID=3.
 COMMENT BOOKMARK;LINE_NUM=815;ID=1.
