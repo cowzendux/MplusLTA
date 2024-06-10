@@ -60,7 +60,7 @@ waittime = 20)**
 modellabel = "3-group LPA",  
 nameList = ["Time1",  "Time2"],  
 profileList = [ ["OpennessT1", "ConcientiousnessT1", "ExtraversionT1", "AgreeablenessT1", "NeuroticismT1"],  
-["OpennessT2", "ConcientiousnessT2", "ExtraversionT2", "AgreeablenessT2", "NeuroticismT2"] ],  
+&nbsp;&nbsp;&nbsp;&nbsp;["OpennessT2", "ConcientiousnessT2", "ExtraversionT2", "AgreeablenessT2", "NeuroticismT2"] ],  
 groups = [3, 2],  
 optseed = 76609,  
 svalues = [ [3, 1, 2], [1, 2] ],  
